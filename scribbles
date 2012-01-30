@@ -30,3 +30,15 @@ model.predict([0,0,0.65,0,0,0,0,0,0,0,0,0,0.65,0,0,0,0,0,4.6,0,0.65,0,0,0,0,0,0,
 model.predict([0,0,0,0,0.63,0,0.31,0.63,0.31,0.63,0.31,0.31,0.31,0,0,0.31,0,0,3.18,0,0.31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.137,0,0.137,0,0,3.537,40,191])
 
 # status - predicts correctly
+
+# finding mean
+for i in range(57):
+    print "%s,%s"%(i, sp.mean(data[:, i]))
+
+# finding median
+for i in range(57):
+    print "%s,%s"%(i, sp.median(data[:, i]))
+
+# finding std
+for i in range(57):
+    print "%s,%s"%(i, sp.std(data[:, i]))

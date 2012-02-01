@@ -30,12 +30,19 @@ from sklearn.linear_model import LogisticRegression
 lr = LogisticRegression(C=0.1, penalty='l1')
 model = lr.fit(training[:,0:-1], training[:,-1)
 
-# test cv set
+# predict cv set
 cv_predict = model.predict(cv[:,0:-1])
-cv[:,-1] == cv_predict
-cv_result = cv[:,-1] == cv_predict
 
-# status - predicts correctly
+# predict test set
+cv_test = model.predict(test[:,0:-1])
+
+# classification report
+from sklearn.metrics import classification_report
+print classification_report(cv[:,-1], cv_predict)
+print classification_report(test[:,-1], cv_test)
+
+
+# -- Diagnostics and plots purposes -- #
 
 # finding mean
 for i in range(57):

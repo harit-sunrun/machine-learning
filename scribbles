@@ -1,33 +1,39 @@
 # To read data in array from url
-from numpy as np
+import numpy as np
+import scipy as sp
+from scipy import stats
 from StringIO import StringIO
 import urllib
 url = "http://archive.ics.uci.edu/ml/machine-learning-databases/spambase/spambase.data"
 f = urllib.urlopen(url)
 data = np.genfromtxt(StringIO(f.read()), delimiter=",")
+
 data.shape # to know the dimensions mxn
 
-# features
-features = data[:,0:(data.shape[1]-1)]
+# normalizing based on z-score
+data[:,0:(data.shape[1]-1)] = stats.zscore(data[:,0:(data.shape[1]-1)])
 
-# labels
-labels = data[:, -1]
+# randomly shuffle data
+np.random.shuffle(data)
 
-# changing types for features
-features = np.int_(features)
+# total samples
+N = 4601
 
-# multpilication
-labels * features.transpose()
+# split data as 60%, 20%, 20% split
+training = data[:int(N*0.6)]
+cv = data[int(N*0.6):int(N*0.8)]
+test = data[int(N*0.8):]
 
 # fit a model
 import scikits as sklearn
 from sklearn.linear_model import LogisticRegression
 lr = LogisticRegression(C=0.1, penalty='l1')
-model = lr.fit(features, labels)
+model = lr.fit(training[:,0:-1], training[:,-1)
 
-# predict
-model.predict([0,0,0.65,0,0,0,0,0,0,0,0,0,0.65,0,0,0,0,0,4.6,0,0.65,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1.97,0.65,0,0,0,0,0,0.125,0,0,1.25,5,40])
-model.predict([0,0,0,0,0.63,0,0.31,0.63,0.31,0.63,0.31,0.31,0.31,0,0,0.31,0,0,3.18,0,0.31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.137,0,0.137,0,0,3.537,40,191])
+# test cv set
+cv_predict = model.predict(cv[:,0:-1])
+cv[:,-1] == cv_predict
+cv_result = cv[:,-1] == cv_predict
 
 # status - predicts correctly
 
@@ -42,3 +48,7 @@ for i in range(57):
 # finding std
 for i in range(57):
     print "%s,%s"%(i, sp.std(data[:, i]))
+
+# plot
+mean_data = np.loadtxt("/Users/Harit/Documents/personal/projects/python/machine-learning/mean", delimiter=',')
+plot(mean_data)

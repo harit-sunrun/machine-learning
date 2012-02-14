@@ -42,6 +42,7 @@ print classification_report(cv[:,-1], cv_predict)
 print classification_report(test[:,-1], cv_test)	
 
 # SVM - fit a model
+from sklearn.svm import SVC
 for i in numpy.arange(0.1,10.0, 0.2):
     clf = SVC(C=i, kernel='linear')
     clf.fit(training[:,0:-1], training[:,-1])

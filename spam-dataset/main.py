@@ -10,12 +10,17 @@ Builds the spam dataset based on input files(currently fetches from Gmail)
 """
 
 from BeautifulSoup import BeautifulSoup
+from collections import Counter
+from nltk.corpus import stopwords
 
 import email
+import getpass
 import imaplib
 import logging
-import sys
 import os
+import re
+import sys
+
 
 class Gmail():
 	def __init__(self, user, passwd):
@@ -32,13 +37,12 @@ class Gmail():
 	
 	def get_emails_as_text(self, label=None):
 		""" returns the list of emails as the text for 'Subject' and 'body' of the email"""
-		try:	
-			#self.mail.select('[Gmail]/Spam')
+		emails_as_text = []
+		try:
 			logging.warn('setting label - ' + label)
 			self.mail.select(label)
 			result, data = self.mail.uid('search', None, "ALL")
 			email_ids = data[0].split()
-			emails_as_text = []
 			for i in email_ids:
 				result, mail_data = self.mail.uid('fetch', i, '(RFC822)')
 				try:
@@ -47,14 +51,13 @@ class Gmail():
 					if not mail_as_text:
 						logging.error('Failed to get email as text, could be other mail type than multipart or text')
 						continue
-
-					print mail_data.get('Subject') + " " + mail_as_text
+					emails_as_text.append(mail_as_text)
 				except UnicodeDecodeError:
 					logging.error('error decoding email, ignoring')
 					continue
-			#return self.__get_text(mail_data.get('Subject') + " " + mail_data.get_payload())
 		except:
 			logging.error('issues while extracting emails - ' + repr(sys.exc_info()[1]))
+		return emails_as_text
 
 	def __get_text(self, data):
 		if not data:
@@ -80,30 +83,63 @@ class Gmail():
 			return return_text
 
 class Features():
-	def __init__(text, spam_word_file):
+	word_splitter = re.compile('\\W*')
+
+	def __init__(self,text, spam_word_file):
 		self.text = text
 		self.spam_file = spam_word_file
-		self.words = get_spam_words(self)
-	
-	def get_percentage_of_matched_word_in_text(self):
-		""" percentage of words in the e-mail that match WORD {SPAM Words} """
-		pass
-	
-	def get_percentage_of_matched_word_in_text(self):
-		""" percentage of words in the e-mail that match WORD {SPAM Words} """
-		pass
-	
-	def get_length_of_longest_capital_letter_sequence(self):
-		pass
-	
-	def get_total_number_of_capital_letters(self):
-		pass
-	
-	def get_spam_words(self):
-		pass
+		self.spam_words = self.__get_spam_words()
+		self.spam_pattern = re.compile('|'.join(map(re.escape, self.spam_words)))
 		
-	def get_words():
+	def get_features(self):
+		if not self.text:
+			raise Exception, 'No text to extract features from'
+		for each_email in self.text:
+			try:
+				each_email = self.__get_content_from_text(each_email)
+				total_words = self.__get_words(each_email)
+				feature = self.__get_percentage_of_matched_word_in_text(each_email, total_words)
+				print
+				print '---------------------'*10
+			except:
+				logging.error('issues while extracting features from emails - ' + repr(sys.exc_info()[1]))
+				continue
+	
+	def __get_content_from_text(self, text):
+		""" Removes stop words from email """
+		if not text:
+			raise Exception, 'Can not extract content from email'
+		s_words = stopwords.words('english')
+		content  = [w.lower() for w in Features.word_splitter.split(text) if w.lower() not in s_words]
+		return ' '.join(content)
+			
+	def __get_percentage_of_matched_word_in_text(self, email, total_words): 
+		""" percentage of words in the e-mail that match WORD {SPAM Words} """
+		match = Counter(self.spam_pattern.findall(email))
+		for spam_word in self.spam_words:
+			wc = match.get(spam_word, 0)
+			#print spam_word, wc, total_words, float((100* wc)/total_words)
+			print float((100* wc)/total_words),
+	
+	def __get_percentage_of_matched_character_in_text(self):
+		""" percentage of words in the e-mail that match WORD {SPAM Words} """
 		pass
+	
+	def __get_length_of_longest_capital_letter_sequence(self):
+		pass
+	
+	def __get_total_number_of_capital_letters(self):
+		pass
+	
+	def __get_spam_words(self):
+		if not (os.path.exists(self.spam_file)):
+			raise Exception, 'Could not locate file containing the spam words'
+		return open(self.spam_file, 'r').read().lower().split('\n')
+		
+	def __get_words(self, text):
+		""" Returns the list of words after removing stop words"""
+		words = [s.lower() for s in Features.word_splitter.split(text)]
+		return len(words)
 
 class Utilities():
 	def __init__(self):
@@ -119,10 +155,12 @@ class Utilities():
 		return ''.join(result)
 	
 def main():
-	email = Gmail('harit.himanshu@gmail.com', '')
-	email = email.get_emails_as_text('[Gmail]/Spam')
-	#email = email.get_emails_as_text('in')
-	
+	user = raw_input('Enter you email-id(include @gmail.com) : ')
+	password = getpass.getpass('Enter your Gmail password : ')
+	email = Gmail(user, password)
+	text_emails = email.get_emails_as_text('[Gmail]/Spam')
+	features = Features(text_emails, 'spamwords')
+	features.get_features()
 
 if __name__ == '__main__':
 	main()

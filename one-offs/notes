@@ -1,0 +1,18 @@
+Step 01: Understand the Data
+	a.) draw plots for mean, median, std
+	b.) if plots look weird(have outliers or data for features is on different scales)
+		- if just few outliers, remove them and goto Step 01
+		- if features are on different scales
+			i.) normalize them - use z-score or other normalization(which?) technique to normalize the data. If using z-score, plotting mean, std will give you zero mean and std of one.
+	c.) sometimes data is not straight forward to process for analysis, for e.g. age or other qualitative data so transformation is needed before we can do initial analysis(what techniques are usually followed in industry?). do transformation and goto Step 01
+
+Step 02: Apply Algorithm
+	a.) Split your data
+		- Randomly split your data into training set(60%), cross-validation set(20%), test set(20%).
+	b.) Train
+		- Based on problem, apply relevant class of algorithms on the input data. For example, for spam detection problem(classification problem), use Logistic Regression and similar algorithms to train the classifier
+	c.) Predict
+		- Once model is trained, predict based on cross-validation set and test set
+	d.) Validate
+		- Its very important to validate the prediction accuracy of the model. For example, in case of classification problems a good measure is looking at precision, recall and f-1 scores
+		- How to validate other problems?

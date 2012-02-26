@@ -6,8 +6,6 @@ from StringIO import StringIO
 
 f = open('/Users/hhimanshu/Downloads/data/fordTrain.csv', 'r')
 data = np.genfromtxt(StringIO(f.read()), delimiter=',')
-f = open('/Users/hhimanshu/Downloads/data/fordTrain.csv', 'r')
-data = np.genfromtxt(StringIO(f.read()), delimiter=',')
 data_header_stripped = data[1:,:]
 data_header_stripped = np.roll(data_header_stripped, -3, axis=1) # rolling 3 column of labels to last column
 # -- finding mean -- #
@@ -36,6 +34,7 @@ legend()
 
 # normalizing based on z-score
 n_data = stats.zscore(data_header_stripped[:,:])
+n_data = nan_to_num(n_data) # replaces nan to 0.0
 
 # -- finding mean -- #
 nd_mean = []
